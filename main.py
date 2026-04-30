@@ -4,9 +4,9 @@ import json
 import ast
 import os
 
-from sjtu-sport-booker.config import FANGTANG_KEY
-from sjtu-sport-booker.utils.messages import send_message_fangtang
-from sjtu-sport-booker.web.app import create_app
+from sjtusportbooker.config import FANGTANG_KEY
+from sjtusportbooker.utils.messages import send_message_fangtang
+from sjtusportbooker.web.app import create_app
 
 
 def play_success_sound():
@@ -18,7 +18,7 @@ def play_success_sound():
     winsound.Beep(440, 10000)
 
 def main(str, args):
-    from sjtu-sport-booker import sjtu-sport-booker
+    from sjtusportbooker import SportBooker
 
     ## 解析参数
     # 1. json文件模式
@@ -46,9 +46,9 @@ def main(str, args):
             "date": [3,4,5,6,7],
             "time": [19,20,21]
         }
-    
+
     # 创建任务
-    worker = sjtu-sport-booker(task, headless=not args.head)
+    worker = SportBooker(task, headless=not args.head)
     
     try:
         worker.login()

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from sjtu-sport-booker.sjtu-sport-booker import sjtu-sport-booker
+from sjtusportbooker.sport_booker import SportBooker
 
 
 class FakeElement:
@@ -28,10 +28,10 @@ class FakeWait:
         return self.responses.pop(0)
 
 
-class sjtu-sport-bookerTests(unittest.TestCase):
+class SportBookerTests(unittest.TestCase):
     def test_search_time_retries_when_no_blocks_rendered(self):
         logs = []
-        worker = sjtu-sport-booker.__new__(sjtu-sport-booker)
+        worker = SportBooker.__new__(SportBooker)
         worker.date = ["2026-05-05"]
         worker.time = [12]
         worker.ordered_flag = False
@@ -39,7 +39,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
         worker.driver = {"_responses": [FakeElement(), FakeElement(children=[])]}
         worker.logger = logs.append
 
-        with patch("sjtu-sport-booker.sjtu-sport-booker.WebDriverWait", FakeWait):
+        with patch("sjtusportbooker.sport_booker.SportBooker.WebDriverWait", FakeWait):
             result = worker.searchTime()
 
         self.assertFalse(worker.ordered_flag)
@@ -50,7 +50,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
         logs = []
         refresh_calls = []
         search_time_results = iter(["empty_blocks", "empty_blocks", "checked"])
-        worker = sjtu-sport-booker.__new__(sjtu-sport-booker)
+        worker = SportBooker.__new__(SportBooker)
         worker.venue = "霍英东体育中心"
         worker.venueItem = "篮球"
         worker.date = ["2026-05-05"]
@@ -73,7 +73,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
 
         worker.searchTime = fake_search_time
 
-        with patch("sjtu-sport-booker.sjtu-sport-booker.sleep", lambda _: None):
+        with patch("sjtusportbooker.sport_booker.SportBooker.sleep", lambda _: None):
             result = worker.book()
 
         self.assertTrue(result)
@@ -81,7 +81,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
 
     def test_book_full_refreshes_after_reaching_empty_block_limit(self):
         refresh_calls = []
-        worker = sjtu-sport-booker.__new__(sjtu-sport-booker)
+        worker = SportBooker.__new__(SportBooker)
         worker.venue = "霍英东体育中心"
         worker.venueItem = "篮球"
         worker.date = ["2026-05-05"]
@@ -106,7 +106,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
 
         worker.searchTime = fake_search_time
 
-        with patch("sjtu-sport-booker.sjtu-sport-booker.sleep", lambda _: None):
+        with patch("sjtusportbooker.sport_booker.SportBooker.sleep", lambda _: None):
             result = worker.book()
 
         self.assertTrue(result)
@@ -116,7 +116,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
         logs = []
         executed_scripts = []
         seat = FakeElement(click_error=Exception("ElementClickInterceptedError"))
-        worker = sjtu-sport-booker.__new__(sjtu-sport-booker)
+        worker = SportBooker.__new__(SportBooker)
         worker.logger = logs.append
         worker.driver = type(
             "Driver",
@@ -134,7 +134,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
         logs = []
         executed_scripts = []
         button = FakeElement(click_error=Exception("ElementNotInteractableError"))
-        worker = sjtu-sport-booker.__new__(sjtu-sport-booker)
+        worker = SportBooker.__new__(SportBooker)
         worker.logger = logs.append
         worker.driver = type(
             "Driver",
@@ -151,7 +151,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
     def test_book_continues_polling_after_search_error(self):
         refresh_calls = []
         logs = []
-        worker = sjtu-sport-booker.__new__(sjtu-sport-booker)
+        worker = SportBooker.__new__(SportBooker)
         worker.venue = "霍英东体育中心"
         worker.venueItem = "篮球"
         worker.date = ["2026-05-05"]
@@ -176,7 +176,7 @@ class sjtu-sport-bookerTests(unittest.TestCase):
 
         worker.searchTime = fake_search_time
 
-        with patch("sjtu-sport-booker.sjtu-sport-booker.sleep", lambda _: None):
+        with patch("sjtusportbooker.sport_booker.SportBooker.sleep", lambda _: None):
             result = worker.book()
 
         self.assertTrue(result)

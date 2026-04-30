@@ -4,7 +4,7 @@ from datetime import datetime
 
 from .notifications import send_smtp_message
 from .runtime_config import list_venues, target_date_to_offsets
-from .sjtu-sport-booker import sjtu-sport-booker
+from .sport_booker import SportBooker
 
 
 def _now_text():
@@ -84,7 +84,7 @@ class TaskManager:
             task_config = config["task"]
             self._set_status(state="running", message="Logging in...", task_running=True)
 
-            worker = sjtu-sport-booker(
+            worker = SportBooker(
                 {
                     "venue": task_config["venue"],
                     "venueItem": task_config["venue_item"],
@@ -149,7 +149,7 @@ class TaskManager:
 
     def test_login(self, config):
         default_venue = list_venues()[0]
-        worker = sjtu-sport-booker(
+        worker = SportBooker(
             {
                 "venue": config["task"]["venue"] or default_venue["name"],
                 "venueItem": config["task"]["venue_item"] or default_venue["items"][0],
@@ -171,6 +171,6 @@ class TaskManager:
     def test_notification(self, config):
         send_smtp_message(
             config["notification"],
-            "sjtu-sport-booker 测试邮件",
+            "SportBooker 测试邮件",
             "这是一封来自本地控制台的测试邮件。",
         )

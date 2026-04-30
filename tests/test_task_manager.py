@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from sjtu-sport-booker.task_manager import TaskManager
+from sjtusportbooker.task_manager import TaskManager
 
 
 class FakeWorkerSuccess:
@@ -80,7 +80,7 @@ class TaskManagerTests(unittest.TestCase):
     def test_successful_run_logs_login_once(self):
         manager = TaskManager()
 
-        with patch("sjtu-sport-booker.task_manager.sjtu-sport-booker", FakeWorkerSuccess):
+        with patch("sjtusportbooker.task_manager.SportBooker", FakeWorkerSuccess):
             manager._run_task(self.base_config())
 
         messages = [entry["message"] for entry in manager.logs()]
@@ -90,7 +90,7 @@ class TaskManagerTests(unittest.TestCase):
     def test_failed_run_marks_error_instead_of_stopped(self):
         manager = TaskManager()
 
-        with patch("sjtu-sport-booker.task_manager.sjtu-sport-booker", FakeWorkerFailure):
+        with patch("sjtusportbooker.task_manager.SportBooker", FakeWorkerFailure):
             manager._run_task(self.base_config())
 
         self.assertEqual(manager.status()["state"], "error")
@@ -99,7 +99,7 @@ class TaskManagerTests(unittest.TestCase):
     def test_false_return_without_manual_stop_marks_error(self):
         manager = TaskManager()
 
-        with patch("sjtu-sport-booker.task_manager.sjtu-sport-booker", FakeWorkerFalse):
+        with patch("sjtusportbooker.task_manager.SportBooker", FakeWorkerFalse):
             manager._run_task(self.base_config())
 
         self.assertEqual(manager.status()["state"], "error")
@@ -109,7 +109,7 @@ class TaskManagerTests(unittest.TestCase):
         manager = TaskManager()
         manager._stop_event.set()
 
-        with patch("sjtu-sport-booker.task_manager.sjtu-sport-booker", FakeWorkerNoBlocks):
+        with patch("sjtusportbooker.task_manager.SportBooker", FakeWorkerNoBlocks):
             manager._run_task(self.base_config())
 
         self.assertEqual(manager.status()["state"], "stopped")

@@ -12,7 +12,7 @@ class WebAppTests(unittest.TestCase):
         self.config_path = Path(self.temp_dir.name) / "runtime-config.json"
 
     def create_client(self):
-        from sjtu-sport-booker.web.app import create_app
+        from sjtusportbooker.web.app import create_app
 
         app = create_app(self.config_path)
         return app.test_client()

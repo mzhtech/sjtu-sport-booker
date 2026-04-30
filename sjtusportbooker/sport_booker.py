@@ -10,7 +10,7 @@ from .utils.captcha_rec import captcha_rec
 from .SJTUVenueTabLists import venueTabLists
 from .config import JACCOUNT_USERNAME, JACCOUNT_PASSWORD
 
-class sjtu-sport-booker:
+class SportBooker:
     def __init__(
         self,
         task,
