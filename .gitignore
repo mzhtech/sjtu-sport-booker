@@ -1,3 +1,6 @@
 __pycache__/
 geckodriver.exe
 sport.log
+.venv/
+.idea/
+runtime-config.json

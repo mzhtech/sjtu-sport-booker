@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SJTU Appointment Console</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="hero">
+        <p>输入账号、场馆、时间和通知参数，点击开始后本地服务负责等待、轮询和尝试下单。</p>
+      </header>
+      <section id="feedback" class="feedback" hidden></section>
+      <section id="success-banner" class="success-banner" hidden>
+        <div class="success-banner__badge">预定成功</div>
+        <div class="success-banner__title">抢到场地了，请尽快前往平台确认并支付。</div>
+        <div class="success-banner__text">页面会保留成功状态，运行日志里也会记录本次成功信息。</div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>登录配置</h2>
+          <label>账号<input id="username" type="text" autocomplete="username"></label>
+          <label>密码<input id="password" type="password" autocomplete="current-password"></label>
+          <label class="checkbox"><input id="headless" type="checkbox" checked>无头模式</label>
+          <button id="test-login" class="primary">测试登录</button>
+        </article>
+
+        <article class="card">
+          <h2>抢票目标</h2>
+          <label>场馆
+            <select id="venue"></select>
+          </label>
+          <label>项目
+            <select id="venue-item"></select>
+          </label>
+          <label>目标日期
+            <input id="target-date" type="date">
+          </label>
+          <label>时间段（24h）
+            <input id="times" type="text" placeholder="例如 19,20,21">
+          </label>
+        </article>
+
+        <article class="card">
+          <h2>邮件通知</h2>
+          <label class="checkbox"><input id="notification-enabled" type="checkbox">启用邮件通知</label>
+          <label>SMTP Host<input id="smtp-host" type="text"></label>
+          <label>SMTP Port<input id="smtp-port" type="number" value="465"></label>
+          <label>Secure
+            <select id="smtp-ssl">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </label>
+          <label>发件邮箱<input id="smtp-sender" type="email"></label>
+          <label>授权码/密码<input id="smtp-password" type="password"></label>
+          <label>收件邮箱<input id="smtp-receiver" type="email"></label>
+          <button id="test-email" class="primary secondary">测试邮件</button>
+        </article>
+
+        <article class="card">
+          <h2>任务控制</h2>
+          <label>启动前轮询间隔(ms)<input id="pre-poll" type="number" value="1000"></label>
+          <label>启动后轮询间隔(ms)<input id="post-poll" type="number" value="500"></label>
+          <div class="button-row">
+            <button id="start-task" class="primary">开始任务</button>
+            <button id="stop-task" class="ghost">停止任务</button>
+          </div>
+          <div class="status-box">
+            <div id="status-message">Ready</div>
+            <div id="status-meta"></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="log-card">
+        <div class="log-header">
+          <h2>运行日志</h2>
+          <button id="refresh-status" class="ghost">刷新</button>
+        </div>
+        <div id="logs" class="logs"></div>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

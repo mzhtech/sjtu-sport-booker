@@ -3,13 +3,23 @@ import argparse
 import json
 import ast
 import os
-import winsound
 
-from SJTUAppointment import SJTUAppointment
-from SJTUAppointment.config import FANGTANG_KEY
-from SJTUAppointment.utils.messages import send_message_fangtang
+from sjtu-sport-booker.config import FANGTANG_KEY
+from sjtu-sport-booker.utils.messages import send_message_fangtang
+from sjtu-sport-booker.web.app import create_app
+
+
+def play_success_sound():
+    try:
+        import winsound
+    except ImportError:
+        print("\a")
+        return
+    winsound.Beep(440, 10000)
 
 def main(str, args):
+    from sjtu-sport-booker import sjtu-sport-booker
+
     ## 解析参数
     # 1. json文件模式
     if str == 'json':
@@ -38,11 +48,10 @@ def main(str, args):
         }
     
     # 创建任务
-    worker = SJTUAppointment(task, headless=not args.head)
+    worker = sjtu-sport-booker(task, headless=not args.head)
     
     try:
         worker.login()
-        print("Login Successfully!")
     except Exception as e:
         print(f"[Login ERROR]: {e}")
     # 预约
@@ -50,9 +59,7 @@ def main(str, args):
         worker.book()
         print("Booking Venue!")
         send_message_fangtang('抢到场地了!', '第一行\n\n第二行', FANGTANG_KEY)
-        duration = 10000  # millisecond
-        freq = 440  # Hz
-        winsound.Beep(freq, duration)
+        play_success_sound()
     except Exception as e:
         print(f"[Booking ERROR]: {e}")
         send_message_fangtang('抢场地失败!', '第一行\n\n第二行', FANGTANG_KEY)
@@ -81,11 +88,15 @@ if __name__ == "__main__":
     parser.add_argument('--venueItem', help='细分项目名称')
     parser.add_argument('--date', help='日期，用方括号表示，例如 [2,3]')
     parser.add_argument('--time', help='时间，用方括号表示，例如 [19,21]')
+    parser.add_argument('--serve', action='store_true', help='启动本地网页控制台')
+    parser.add_argument('--host', default='127.0.0.1', help='Web 服务监听地址')
+    parser.add_argument('--port', default=3210, type=int, help='Web 服务端口')
 
     args = parser.parse_args()
-    if args.json:
+    if args.serve or (not args.json and not args.venue):
+        app = create_app(os.path.join(currentPath, "runtime-config.json"))
+        app.run(host=args.host, port=args.port, debug=False)
+    elif args.json:
         main('json', args)
-    elif args.venue:
-        main('terminal', args)
     else:
-        main('default', args)
+        main('terminal', args)
