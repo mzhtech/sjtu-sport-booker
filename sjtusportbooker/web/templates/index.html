@@ -35,9 +35,13 @@
           <label>项目
             <select id="venue-item"></select>
           </label>
-          <label>目标日期
-            <input id="target-date" type="date">
+          <label>目标日期（可多选）
+            <span class="date-picker-row">
+              <input id="target-date-picker" type="date">
+              <button id="add-target-date" class="ghost date-add-button" type="button">添加</button>
+            </span>
           </label>
+          <div id="target-dates" class="selected-dates" aria-live="polite"></div>
           <label>时间段（24h）
             <input id="times" type="text" placeholder="例如 19,20,21">
           </label>
@@ -62,6 +66,7 @@
 
         <article class="card">
           <h2>任务控制</h2>
+          <label>并发度（按日期分片，1–10）<input id="concurrency" type="number" min="1" max="10" step="1" value="1"></label>
           <label>启动前轮询间隔(ms)<input id="pre-poll" type="number" value="1000"></label>
           <label>启动后轮询间隔(ms)<input id="post-poll" type="number" value="500"></label>
           <div class="button-row">

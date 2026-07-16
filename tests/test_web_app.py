@@ -29,7 +29,8 @@ class WebAppTests(unittest.TestCase):
         self.assertIn("account", payload["config"])
         self.assertIn("task", payload["config"])
         self.assertIn("notification", payload["config"])
-        self.assertIn("target_date", payload["config"]["task"])
+        self.assertIn("target_dates", payload["config"]["task"])
+        self.assertEqual(len(payload["config"]["task"]["target_dates"]), 1)
         self.assertTrue(payload["venues"])
 
     def test_save_config_persists_to_disk(self):
@@ -39,8 +40,9 @@ class WebAppTests(unittest.TestCase):
             "task": {
                 "venue": "气膜体育中心",
                 "venue_item": "篮球",
-                "target_date": "2026-05-05",
+                "target_dates": ["2026-05-06", "2026-05-05", "2026-05-05"],
                 "times": [19, 20],
+                "concurrency": 3,
                 "headless": True,
                 "pre_poll_ms": 1000,
                 "post_poll_ms": 500,
@@ -62,7 +64,8 @@ class WebAppTests(unittest.TestCase):
         saved = json.loads(self.config_path.read_text(encoding="utf-8"))
         self.assertEqual(saved["account"]["username"], "alice")
         self.assertEqual(saved["task"]["venue_item"], "篮球")
-        self.assertEqual(saved["task"]["target_date"], "2026-05-05")
+        self.assertEqual(saved["task"]["target_dates"], ["2026-05-05", "2026-05-06"])
+        self.assertEqual(saved["task"]["concurrency"], 3)
         self.assertTrue(saved["notification"]["enabled"])
 
     def test_start_rejects_incomplete_config(self):
@@ -72,7 +75,7 @@ class WebAppTests(unittest.TestCase):
             "/api/start",
             json={
                 "account": {"username": "", "password": ""},
-                "task": {"venue": "", "venue_item": "", "target_date": "", "times": []},
+                "task": {"venue": "", "venue_item": "", "target_dates": [], "times": []},
                 "notification": {"enabled": False},
             },
         )
@@ -90,7 +93,7 @@ class WebAppTests(unittest.TestCase):
                 "task": {
                     "venue": "气膜体育中心",
                     "venue_item": "篮球",
-                    "target_date": "",
+                    "target_dates": [],
                     "times": [19, 20],
                 },
                 "notification": {"enabled": False},
@@ -99,6 +102,44 @@ class WebAppTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("日期", response.get_json()["error"])
+
+    def test_legacy_target_date_is_migrated_to_target_dates(self):
+        client = self.create_client()
+
+        response = client.post(
+            "/api/config",
+            json={
+                "task": {
+                    "target_date": "2026-05-05",
+                }
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        task = response.get_json()["config"]["task"]
+        self.assertEqual(task["target_dates"], ["2026-05-05"])
+        self.assertNotIn("target_date", task)
+
+    def test_start_rejects_concurrency_outside_supported_range(self):
+        client = self.create_client()
+
+        response = client.post(
+            "/api/start",
+            json={
+                "account": {"username": "alice", "password": "secret"},
+                "task": {
+                    "venue": "气膜体育中心",
+                    "venue_item": "篮球",
+                    "target_dates": ["2026-05-05"],
+                    "times": [19],
+                    "concurrency": 11,
+                },
+                "notification": {"enabled": False},
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("并发度", response.get_json()["error"])
 
     def test_stream_endpoint_returns_event_stream(self):
         client = self.create_client()

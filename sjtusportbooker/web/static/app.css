@@ -168,6 +168,60 @@ select {
   height: 16px;
 }
 
+.date-picker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.date-add-button {
+  width: 64px;
+  height: 42px;
+}
+
+.selected-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-height: 30px;
+}
+
+.date-empty {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 30px;
+}
+
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 6px 0 10px;
+  border-radius: 999px;
+  background: rgba(15, 116, 88, 0.1);
+  color: var(--accent-strong);
+  font-size: 12px;
+}
+
+.date-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--accent-strong);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.date-remove:hover {
+  background: rgba(15, 116, 88, 0.12);
+  transform: none;
+}
+
 button {
   border: 0;
   border-radius: 14px;

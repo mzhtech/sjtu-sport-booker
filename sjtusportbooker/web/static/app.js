@@ -1,5 +1,6 @@
 const state = {
   venues: [],
+  targetDates: [],
   streamStarted: false,
   pollTimer: null,
   activeTaskPollTimer: null,
@@ -32,7 +33,7 @@ function startActiveTaskPolling() {
 }
 
 function renderControls(status) {
-  const busyStates = new Set(["starting", "running", "stopping"]);
+  const busyStates = new Set(["starting", "running", "recovering", "stopping"]);
   const isBusy = busyStates.has(status.state);
   setButtonDisabled("#start-task", isBusy);
   setButtonDisabled("#test-login", isBusy);
@@ -72,6 +73,47 @@ function parseCsvNumbers(value) {
     .filter((item) => !Number.isNaN(item));
 }
 
+function renderTargetDates() {
+  const container = document.querySelector("#target-dates");
+  if (!state.targetDates.length) {
+    container.innerHTML = '<span class="date-empty">尚未选择日期</span>';
+    return;
+  }
+
+  container.innerHTML = "";
+  state.targetDates.forEach((date) => {
+    const chip = document.createElement("span");
+    chip.className = "date-chip";
+
+    const text = document.createElement("span");
+    text.textContent = date;
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "date-remove";
+    remove.dataset.date = date;
+    remove.setAttribute("aria-label", `移除日期 ${date}`);
+    remove.textContent = "×";
+
+    chip.append(text, remove);
+    container.appendChild(chip);
+  });
+}
+
+function addTargetDate() {
+  const picker = document.querySelector("#target-date-picker");
+  const date = picker.value;
+  if (!date) {
+    setFeedback("请先选择一个日期", "error");
+    return;
+  }
+
+  state.targetDates = [...new Set([...state.targetDates, date])].sort();
+  picker.value = "";
+  renderTargetDates();
+  setFeedback("");
+}
+
 function collectConfig() {
   return {
     account: {
@@ -81,8 +123,9 @@ function collectConfig() {
     task: {
       venue: document.querySelector("#venue").value,
       venue_item: document.querySelector("#venue-item").value,
-      target_date: document.querySelector("#target-date").value,
+      target_dates: [...state.targetDates],
       times: parseCsvNumbers(document.querySelector("#times").value),
+      concurrency: Number(document.querySelector("#concurrency").value || 1),
       headless: document.querySelector("#headless").checked,
       pre_poll_ms: Number(document.querySelector("#pre-poll").value || 1000),
       post_poll_ms: Number(document.querySelector("#post-poll").value || 500),
@@ -128,8 +171,13 @@ function fillForm(config, venues) {
   document.querySelector("#username").value = config.account.username || "";
   document.querySelector("#password").value = config.account.password || "";
   document.querySelector("#headless").checked = Boolean(config.task.headless);
-  document.querySelector("#target-date").value = config.task.target_date || "";
+  state.targetDates = [
+    ...(config.task.target_dates || (config.task.target_date ? [config.task.target_date] : [])),
+  ].sort();
+  document.querySelector("#target-date-picker").value = "";
+  renderTargetDates();
   document.querySelector("#times").value = (config.task.times || []).join(",");
+  document.querySelector("#concurrency").value = config.task.concurrency ?? 1;
   document.querySelector("#pre-poll").value = config.task.pre_poll_ms ?? 1000;
   document.querySelector("#post-poll").value = config.task.post_poll_ms ?? 500;
   document.querySelector("#notification-enabled").checked = Boolean(config.notification.enabled);
@@ -249,6 +297,17 @@ async function runAction(action) {
 
 document.querySelector("#venue").addEventListener("change", (event) => {
   updateVenueItems(event.target.value);
+});
+
+document.querySelector("#add-target-date").addEventListener("click", addTargetDate);
+
+document.querySelector("#target-dates").addEventListener("click", (event) => {
+  const button = event.target.closest(".date-remove");
+  if (!button) {
+    return;
+  }
+  state.targetDates = state.targetDates.filter((date) => date !== button.dataset.date);
+  renderTargetDates();
 });
 
 document.querySelector("#test-login").addEventListener("click", () =>
